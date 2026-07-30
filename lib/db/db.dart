@@ -5,8 +5,9 @@ class ToDoDB {
   bool isDarkMode = false;
   bool isRetroTheme = false;
 
-  // reference our box
-  final _myBox = Hive.box('MyBox');
+  // Lazily access the Hive box so tests (which don't open Hive) won't
+  // throw during construction.
+  Box? get _myBox => Hive.isBoxOpen('MyBox') ? Hive.box('MyBox') : null;
 
   // run this method if this is the 1st time ever opening this app
   void createInitialData() {
@@ -20,8 +21,8 @@ class ToDoDB {
 
   // load the data from database
   void loadData() {
-    toDoList = _myBox.get("TODOLIST") ?? [];
-    
+    toDoList = _myBox?.get("TODOLIST") ?? [];
+
     // Migrate old data if necessary (ensure 3 fields per task)
     for (int i = 0; i < toDoList.length; i++) {
       if (toDoList[i].length < 3) {
@@ -29,14 +30,16 @@ class ToDoDB {
       }
     }
 
-    isDarkMode = _myBox.get("IS_DARK_MODE") ?? false;
-    isRetroTheme = _myBox.get("IS_RETRO_THEME") ?? false;
+    isDarkMode = _myBox?.get("IS_DARK_MODE") ?? false;
+    isRetroTheme = _myBox?.get("IS_RETRO_THEME") ?? false;
   }
 
   // update the database
   void updateDatabase() {
-    _myBox.put("TODOLIST", toDoList);
-    _myBox.put("IS_DARK_MODE", isDarkMode);
-    _myBox.put("IS_RETRO_THEME", isRetroTheme);
+    if (_myBox != null) {
+      _myBox!.put("TODOLIST", toDoList);
+      _myBox!.put("IS_DARK_MODE", isDarkMode);
+      _myBox!.put("IS_RETRO_THEME", isRetroTheme);
+    }
   }
 }

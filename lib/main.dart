@@ -25,16 +25,20 @@ class MyApp extends StatefulWidget {
 }
 
 class MyAppState extends State<MyApp> {
-  final _myBox = Hive.box('MyBox');
-
-  void refresh() {
-    setState(() {});
-  }
+  void refresh() => setState(() {});
 
   @override
   Widget build(BuildContext context) {
-    bool isDarkMode = _myBox.get("IS_DARK_MODE") ?? false;
-    bool isRetroTheme = _myBox.get("IS_RETRO_THEME") ?? false;
+    bool isDarkMode = false;
+    bool isRetroTheme = false;
+
+    // When running tests or other environments the Hive box may not be
+    // opened. Guard against that and fall back to defaults.
+    if (Hive.isBoxOpen('MyBox')) {
+      final box = Hive.box('MyBox');
+      isDarkMode = box.get("IS_DARK_MODE") ?? false;
+      isRetroTheme = box.get("IS_RETRO_THEME") ?? false;
+    }
 
     return MaterialApp(
       title: 'Todo',

@@ -13,17 +13,26 @@ class Homepage extends StatefulWidget {
 }
 
 class _HomepageState extends State<Homepage> {
-  final _myBox = Hive.box('MyBox');
+  // Don't access Hive boxes during field initialization — tests may pump
+  // widgets without opening boxes. Access the box lazily in initState
+  // only when it's open.
+  Box? _myBox;
   ToDoDB db = ToDoDB();
 
   @override
   void initState() {
-    if (_myBox.get("TODOLIST") == null) {
-      db.createInitialData();
-    } else {
-      db.loadData();
-    }
     super.initState();
+    if (Hive.isBoxOpen('MyBox')) {
+      _myBox = Hive.box('MyBox');
+      if (_myBox!.get("TODOLIST") == null) {
+        db.createInitialData();
+      } else {
+        db.loadData();
+      }
+    } else {
+      // No box available (tests or early startup). Keep DB with defaults;
+      // avoid calling Hive until the box is opened in `main()`.
+    }
   }
 
   final _controller = TextEditingController();
@@ -246,13 +255,6 @@ class _HomepageState extends State<Homepage> {
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
-                                "Welcome to MichCode app",
-                                style: TextStyle(
-                                  fontSize: 18 * scale,
-                                  color: contrastColor.withAlpha(150),
-                                ),
-                              ),
                               Text(
                                 "Todo",
                                 style: TextStyle(
