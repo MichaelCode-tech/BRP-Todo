@@ -15,7 +15,6 @@ class DialogbBox extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    bool isDark = Theme.of(context).brightness == Brightness.dark;
     bool isRetro =
         Theme.of(context).appBarTheme.titleTextStyle?.fontFamily == 'Courier';
     final Color surfaceColor = Theme.of(context).colorScheme.surface;

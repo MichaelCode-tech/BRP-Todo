@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:todo1/pags/homePage.dart';
+import 'package:todo1/pags/home_page.dart';
 import 'package:todo1/utilites/theme_manager.dart';
 
 void main() async {
@@ -32,8 +32,7 @@ class MyAppState extends State<MyApp> {
     bool isDarkMode = false;
     bool isRetroTheme = false;
 
-    // When running tests or other environments the Hive box may not be
-    // opened. Guard against that and fall back to defaults.
+    // Guard against box not being open (e.g. in tests)
     if (Hive.isBoxOpen('MyBox')) {
       final box = Hive.box('MyBox');
       isDarkMode = box.get("IS_DARK_MODE") ?? false;

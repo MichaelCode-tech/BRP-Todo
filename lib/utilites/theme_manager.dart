@@ -41,11 +41,11 @@ class ThemeManager {
         surface: isDark ? const Color(0xFF1E1E1E) : Colors.white,
       ),
       checkboxTheme: CheckboxThemeData(
-        fillColor: MaterialStateProperty.resolveWith((states) {
-          if (states.contains(MaterialState.selected)) return primaryColor;
+        fillColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) return primaryColor;
           return Colors.transparent;
         }),
-        checkColor: MaterialStateProperty.all(isDark ? Colors.black : Colors.white),
+        checkColor: WidgetStateProperty.all(isDark ? Colors.black : Colors.white),
       ),
     );
   }
@@ -85,8 +85,8 @@ class ThemeManager {
         shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
       ),
       checkboxTheme: CheckboxThemeData(
-        fillColor: MaterialStateProperty.all(primaryColor),
-        checkColor: MaterialStateProperty.all(isDark ? Colors.black : Colors.white),
+        fillColor: WidgetStateProperty.all(primaryColor),
+        checkColor: WidgetStateProperty.all(isDark ? Colors.black : Colors.white),
         shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
       ),
     );

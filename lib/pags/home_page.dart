@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:todo1/db/db.dart';
-import 'package:todo1/pags/settingsPage.dart';
-import 'package:todo1/utilites/ToDoTile.dart';
-import 'package:todo1/utilites/dialogBox.dart';
+import 'package:todo1/pags/settings_page.dart';
+import 'package:todo1/utilites/todo_tile.dart';
+import 'package:todo1/utilites/dialog_box.dart';
 
 class Homepage extends StatefulWidget {
   const Homepage({super.key});
@@ -255,6 +255,13 @@ class _HomepageState extends State<Homepage> {
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
+                              Text(
+                                "Welcome to MicCode App",
+                                style: TextStyle(
+                                  fontSize: 14 * scale,
+                                  color: contrastColor.withAlpha(180),
+                                ),
+                              ),
                               Text(
                                 "Todo",
                                 style: TextStyle(
