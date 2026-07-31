@@ -4,13 +4,17 @@ import 'package:todo1/pags/home_page.dart';
 import 'package:todo1/utilites/theme_manager.dart';
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
+  try {
+    WidgetsFlutterBinding.ensureInitialized();
 
-  // init the hive
-  await Hive.initFlutter();
+    // init the hive
+    await Hive.initFlutter();
 
-  // open a box
-  await Hive.openBox('MyBox');
+    // open a box
+    await Hive.openBox('MyBox');
+  } catch (e) {
+    debugPrint("Startup error: $e");
+  }
 
   runApp(const MyApp());
 }

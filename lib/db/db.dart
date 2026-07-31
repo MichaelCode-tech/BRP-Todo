@@ -21,10 +21,20 @@ class ToDoDB {
 
   // load the data from database
   void loadData() {
-    toDoList = _myBox?.get("TODOLIST") ?? [];
+    final rawData = _myBox?.get("TODOLIST");
+    if (rawData is List) {
+      toDoList = List.from(rawData);
+    } else {
+      toDoList = [];
+    }
 
     // Migrate old data if necessary (ensure 3 fields per task)
     for (int i = 0; i < toDoList.length; i++) {
+      if (toDoList[i] is! List || toDoList[i].length < 2) {
+        // Fallback for corrupted items
+        toDoList[i] = ["Invalid Task", false, false];
+        continue;
+      }
       if (toDoList[i].length < 3) {
         toDoList[i] = [toDoList[i][0], toDoList[i][1], false];
       }
