@@ -10,3 +10,8 @@
 -keep class io.flutter.view.** { *; }
 -keep class io.flutter.embedding.** { *; }
 -keep class io.flutter.plugins.** { *; }
+
+# Flutter Play Store Deferred Components missing classes rules
+-dontwarn com.google.android.play.core.**
+-keep class com.google.android.play.core.** { *; }
+-keep class io.flutter.embedding.engine.deferredcomponents.** { *; }
