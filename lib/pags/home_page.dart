@@ -36,6 +36,9 @@ class _HomepageState extends State<Homepage> {
   }
 
   final _controller = TextEditingController();
+  bool _showCompletedTasks = false;
+  bool _showUncompletedTasks = false;
+  static const int _toggleThreshold = 5;
 
   void checkBoxChanged(bool? value, int index, bool isCompletedList) {
     setState(() {
@@ -323,7 +326,7 @@ class _HomepageState extends State<Homepage> {
                       vertical: 14 * scale,
                     ),
                     child: Text(
-                      "In Progress",
+                      "Todo",
                       style: TextStyle(
                         fontSize: 20 * scale,
                         fontWeight: FontWeight.bold,
@@ -332,11 +335,59 @@ class _HomepageState extends State<Homepage> {
                     ),
                   ),
                 ),
-              SliverList(
-                delegate: SliverChildBuilderDelegate((context, index) {
-                  return _buildTaskItem(uncompletedTasks, index, false, scale);
-                }, childCount: uncompletedTasks.length),
-              ),
+              if (uncompletedTasks.length > _toggleThreshold)
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 25.0 * scale,
+                      vertical: 8.0 * scale,
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          '${uncompletedTasks.length} tasks in progress',
+                          style: TextStyle(
+                            fontSize: 16 * scale,
+                            color: contrastColor.withAlpha(200),
+                          ),
+                        ),
+                        TextButton.icon(
+                          onPressed: () {
+                            setState(() {
+                              _showUncompletedTasks = !_showUncompletedTasks;
+                            });
+                          },
+                          icon: Icon(
+                            _showUncompletedTasks
+                                ? Icons.expand_less
+                                : Icons.expand_more,
+                            color: primaryColor,
+                          ),
+                          label: Text(
+                            _showUncompletedTasks ? 'Hide list' : 'Show list',
+                            style: TextStyle(color: primaryColor),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              if (uncompletedTasks.length <= _toggleThreshold ||
+                  _showUncompletedTasks)
+                SliverList(
+                  delegate: SliverChildBuilderDelegate((context, index) {
+                    return _buildTaskItem(
+                      uncompletedTasks,
+                      index,
+                      false,
+                      scale,
+                    );
+                  }, childCount: uncompletedTasks.length),
+                ),
+              if (uncompletedTasks.length > _toggleThreshold &&
+                  !_showUncompletedTasks)
+                SliverToBoxAdapter(child: SizedBox(height: 12 * scale)),
               if (completedTasks.isNotEmpty)
                 SliverToBoxAdapter(
                   child: Padding(
@@ -356,11 +407,54 @@ class _HomepageState extends State<Homepage> {
                     ),
                   ),
                 ),
-              SliverList(
-                delegate: SliverChildBuilderDelegate((context, index) {
-                  return _buildTaskItem(completedTasks, index, true, scale);
-                }, childCount: completedTasks.length),
-              ),
+              if (completedTasks.length > _toggleThreshold)
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 25.0 * scale,
+                      vertical: 8.0 * scale,
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          '${completedTasks.length} completed tasks',
+                          style: TextStyle(
+                            fontSize: 16 * scale,
+                            color: contrastColor.withAlpha(200),
+                          ),
+                        ),
+                        TextButton.icon(
+                          onPressed: () {
+                            setState(() {
+                              _showCompletedTasks = !_showCompletedTasks;
+                            });
+                          },
+                          icon: Icon(
+                            _showCompletedTasks
+                                ? Icons.expand_less
+                                : Icons.expand_more,
+                            color: primaryColor,
+                          ),
+                          label: Text(
+                            _showCompletedTasks ? 'Hide list' : 'Show list',
+                            style: TextStyle(color: primaryColor),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              if (completedTasks.length <= _toggleThreshold ||
+                  _showCompletedTasks)
+                SliverList(
+                  delegate: SliverChildBuilderDelegate((context, index) {
+                    return _buildTaskItem(completedTasks, index, true, scale);
+                  }, childCount: completedTasks.length),
+                ),
+              if (completedTasks.length > _toggleThreshold &&
+                  !_showCompletedTasks)
+                SliverToBoxAdapter(child: SizedBox(height: 12 * scale)),
               SliverToBoxAdapter(child: SizedBox(height: 100 * scale)),
             ],
           ),
