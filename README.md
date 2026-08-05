@@ -55,10 +55,9 @@ Whether you're pushing pixels as a UI/UX designer or shipping code as a develope
 Ready to get stuff done? Grab the pre-built binaries directly from the releases page:
 
 * 🤖 **[Download for Android (.apk)](https://github.com/MichaelCode-tech/BRP-Todo/releases/download/v2/Todo.apk)**
-* 🍏 **[Download for iPhone (.zip)](https://github.com/MichaelCode-tech/BRP-Todo/releases/download/V2/Todo.zip)**
+* 🍏 **[Download for iPhone (.zip)](https://github.com/MichaelCode-tech/BRP-Todo/releases/download/v2/Todo.zip)**
 
 ---
-
 
 ## 🛠️ Local Setup & Development
 
