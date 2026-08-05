@@ -6,6 +6,7 @@ class TaskDialogBox extends StatefulWidget {
   final String initialStartTime;
   final String initialEndTime;
   final List<String> initialTags;
+  final String dialogTitle;
   final void Function(
     String title,
     String startTime,
@@ -18,9 +19,10 @@ class TaskDialogBox extends StatefulWidget {
   const TaskDialogBox({
     super.key,
     this.initialTitle = '',
-    this.initialStartTime = '',
-    this.initialEndTime = '',
-    this.initialTags = const [],
+    this.initialStartTime = '09:00',
+    this.initialEndTime = '10:00',
+    this.initialTags = const ['Gym'],
+    this.dialogTitle = 'New Task',
     required this.onSave,
     required this.onCancel,
   });
@@ -47,16 +49,15 @@ class _TaskDialogBoxState extends State<TaskDialogBox> {
   }
 
   Future<void> _pickTime(bool isStart) async {
-    final initial = TimeOfDay.now();
     final picked = await showTimePicker(
       context: context,
       initialTime: isStart
-          ? (widget.initialStartTime.isNotEmpty
-                ? _parseTime(widget.initialStartTime)
-                : initial)
-          : (widget.initialEndTime.isNotEmpty
-                ? _parseTime(widget.initialEndTime)
-                : initial),
+          ? (_startTime.isNotEmpty
+                ? _parseTime(_startTime)
+                : _parseTime(widget.initialStartTime))
+          : (_endTime.isNotEmpty
+                ? _parseTime(_endTime)
+                : _parseTime(widget.initialEndTime)),
     );
     if (picked != null) {
       setState(() {
@@ -80,15 +81,9 @@ class _TaskDialogBoxState extends State<TaskDialogBox> {
   }
 
   void _save() {
-    final title = _titleController.text.trim();
+    var title = _titleController.text.trim();
     if (title.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Task title cannot be empty.'),
-          backgroundColor: Colors.red,
-        ),
-      );
-      return;
+      title = widget.initialTitle.isNotEmpty ? widget.initialTitle : 'Task 1';
     }
     final tags = _tagsController.text
         .split(',')
@@ -106,7 +101,7 @@ class _TaskDialogBoxState extends State<TaskDialogBox> {
     final surfaceColor = Theme.of(context).colorScheme.surface;
 
     return AlertDialog(
-      title: const Text('New Task'),
+      title: Text(widget.dialogTitle),
       backgroundColor: surfaceColor,
       surfaceTintColor: Colors.transparent,
       shape: isRetro

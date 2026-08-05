@@ -237,29 +237,19 @@ class _HomepageState extends State<Homepage> {
   }
 
   void _showNewTaskDialog() {
-    _controller.clear();
     showDialog(
       context: context,
       builder: (context) {
         return TaskDialogBox(
+          dialogTitle: 'New Task',
+          initialTitle: 'Task ${db.toDoList.length + 1}',
+          initialStartTime: '09:00',
+          initialEndTime: '10:00',
+          initialTags: const ['Gym'],
           onSave: _saveTask,
           onCancel: () => Navigator.of(context).pop(),
         );
       },
-    );
-  }
-
-  void _navigateToTags() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => TagPage(db: db)),
-    ).then((_) => setState(() {}));
-  }
-
-  void _navigateToTracker() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => MonthlyTrackerPage(db: db)),
     );
   }
 
@@ -301,7 +291,9 @@ class _HomepageState extends State<Homepage> {
                 tooltip: 'Tasks',
                 icon: Icon(
                   Icons.checklist_rtl,
-                  color: _bottomNavIndex == 0 ? primaryColor : contrastColor.withAlpha(160),
+                  color: _bottomNavIndex == 0
+                      ? primaryColor
+                      : contrastColor.withAlpha(160),
                 ),
                 onPressed: () {
                   setState(() {
@@ -315,7 +307,9 @@ class _HomepageState extends State<Homepage> {
                     tooltip: 'Tags',
                     icon: Icon(
                       Icons.label_outline,
-                      color: _bottomNavIndex == 1 ? primaryColor : contrastColor.withAlpha(160),
+                      color: _bottomNavIndex == 1
+                          ? primaryColor
+                          : contrastColor.withAlpha(160),
                     ),
                     onPressed: () {
                       setState(() {
@@ -327,7 +321,9 @@ class _HomepageState extends State<Homepage> {
                     tooltip: 'Tracker',
                     icon: Icon(
                       Icons.insights,
-                      color: _bottomNavIndex == 2 ? primaryColor : contrastColor.withAlpha(160),
+                      color: _bottomNavIndex == 2
+                          ? primaryColor
+                          : contrastColor.withAlpha(160),
                     ),
                     onPressed: () {
                       setState(() {
@@ -361,247 +357,255 @@ class _HomepageState extends State<Homepage> {
                     child: Padding(
                       padding: EdgeInsets.all(25.0 * scale),
                       child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(12),
-                            child: Image.asset(
-                              'lib/assets/images/logo.png',
-                              width: 48 * scale,
-                              height: 48 * scale,
-                              fit: BoxFit.cover,
-                              color: isDark ? Colors.white : null,
-                              colorBlendMode: isDark ? BlendMode.srcIn : null,
-                              errorBuilder: (context, error, stackTrace) =>
-                                  Container(
-                                    width: 48 * scale,
-                                    height: 48 * scale,
-                                    decoration: BoxDecoration(
-                                      color: primaryColor.withAlpha(40),
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                    child: Icon(
-                                      Icons.apps,
-                                      color: contrastColor,
-                                      size: 20 * scale,
-                                    ),
-                                  ),
-                            ),
-                          ),
-                          SizedBox(width: 12 * scale),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                          Row(
                             children: [
-                              Text(
-                                'Plan your day and track progress by tag.',
-                                style: TextStyle(
-                                  fontSize: 14 * scale,
-                                  color: contrastColor.withAlpha(180),
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(12),
+                                child: Image.asset(
+                                  'lib/assets/images/logo.png',
+                                  width: 48 * scale,
+                                  height: 48 * scale,
+                                  fit: BoxFit.cover,
+                                  color: isDark ? Colors.white : null,
+                                  colorBlendMode: isDark
+                                      ? BlendMode.srcIn
+                                      : null,
+                                  errorBuilder: (context, error, stackTrace) =>
+                                      Container(
+                                        width: 48 * scale,
+                                        height: 48 * scale,
+                                        decoration: BoxDecoration(
+                                          color: primaryColor.withAlpha(40),
+                                          borderRadius: BorderRadius.circular(
+                                            12,
+                                          ),
+                                        ),
+                                        child: Icon(
+                                          Icons.apps,
+                                          color: contrastColor,
+                                          size: 20 * scale,
+                                        ),
+                                      ),
                                 ),
                               ),
-                              Text(
-                                'Todo Tracker',
-                                style: TextStyle(
-                                  fontSize: 28 * scale,
-                                  fontWeight: FontWeight.bold,
-                                  color: primaryColor,
-                                ),
+                              SizedBox(width: 12 * scale),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Plan your day and track progress by tag.',
+                                    style: TextStyle(
+                                      fontSize: 14 * scale,
+                                      color: contrastColor.withAlpha(180),
+                                    ),
+                                  ),
+                                  Text(
+                                    'Todo Tracker',
+                                    style: TextStyle(
+                                      fontSize: 28 * scale,
+                                      fontWeight: FontWeight.bold,
+                                      color: primaryColor,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ],
                           ),
                         ],
                       ),
-                    ],
+                    ),
                   ),
-                ),
-              ),
-              if (!hasTasks)
-                SliverFillRemaining(
-                  hasScrollBody: false,
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 40.0 * scale),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.task_alt,
-                          size: 88 * scale,
-                          color: primaryColor.withAlpha(180),
+                  if (!hasTasks)
+                    SliverFillRemaining(
+                      hasScrollBody: false,
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 40.0 * scale),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.task_alt,
+                              size: 88 * scale,
+                              color: primaryColor.withAlpha(180),
+                            ),
+                            SizedBox(height: 20 * scale),
+                            Text(
+                              'No tasks yet',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontSize: 22 * scale,
+                                fontWeight: FontWeight.w600,
+                                color: contrastColor,
+                              ),
+                            ),
+                            SizedBox(height: 12 * scale),
+                            Text(
+                              'Tap + to add your first task, set time windows, assign tags, and start tracking monthly progress.',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontSize: 16 * scale,
+                                color: contrastColor.withAlpha(160),
+                                height: 1.4,
+                              ),
+                            ),
+                          ],
                         ),
-                        SizedBox(height: 20 * scale),
-                        Text(
-                          'No tasks yet',
-                          textAlign: TextAlign.center,
+                      ),
+                    ),
+                  if (uncompletedTasks.isNotEmpty)
+                    SliverToBoxAdapter(
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 25.0 * scale,
+                          vertical: 14 * scale,
+                        ),
+                        child: Text(
+                          'In Progress',
                           style: TextStyle(
-                            fontSize: 22 * scale,
-                            fontWeight: FontWeight.w600,
+                            fontSize: 20 * scale,
+                            fontWeight: FontWeight.bold,
                             color: contrastColor,
                           ),
                         ),
-                        SizedBox(height: 12 * scale),
-                        Text(
-                          'Tap + to add your first task, set time windows, assign tags, and start tracking monthly progress.',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: 16 * scale,
-                            color: contrastColor.withAlpha(160),
-                            height: 1.4,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              if (uncompletedTasks.isNotEmpty)
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: 25.0 * scale,
-                      vertical: 14 * scale,
-                    ),
-                    child: Text(
-                      'In Progress',
-                      style: TextStyle(
-                        fontSize: 20 * scale,
-                        fontWeight: FontWeight.bold,
-                        color: contrastColor,
                       ),
                     ),
-                  ),
-                ),
-              if (uncompletedTasks.length > _toggleThreshold)
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: 25.0 * scale,
-                      vertical: 8.0 * scale,
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          '${uncompletedTasks.length} active tasks',
-                          style: TextStyle(
-                            fontSize: 16 * scale,
-                            color: contrastColor.withAlpha(200),
-                          ),
+                  if (uncompletedTasks.length > _toggleThreshold)
+                    SliverToBoxAdapter(
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 25.0 * scale,
+                          vertical: 8.0 * scale,
                         ),
-                        TextButton.icon(
-                          onPressed: () {
-                            setState(() {
-                              _showUncompletedTasks = !_showUncompletedTasks;
-                            });
-                          },
-                          icon: Icon(
-                            _showUncompletedTasks
-                                ? Icons.expand_less
-                                : Icons.expand_more,
-                            color: primaryColor,
-                          ),
-                          label: Text(
-                            _showUncompletedTasks ? 'Hide list' : 'Show list',
-                            style: TextStyle(color: primaryColor),
-                          ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              '${uncompletedTasks.length} active tasks',
+                              style: TextStyle(
+                                fontSize: 16 * scale,
+                                color: contrastColor.withAlpha(200),
+                              ),
+                            ),
+                            TextButton.icon(
+                              onPressed: () {
+                                setState(() {
+                                  _showUncompletedTasks =
+                                      !_showUncompletedTasks;
+                                });
+                              },
+                              icon: Icon(
+                                _showUncompletedTasks
+                                    ? Icons.expand_less
+                                    : Icons.expand_more,
+                                color: primaryColor,
+                              ),
+                              label: Text(
+                                _showUncompletedTasks
+                                    ? 'Hide list'
+                                    : 'Show list',
+                                style: TextStyle(color: primaryColor),
+                              ),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
-                  ),
-                ),
-              if (uncompletedTasks.length <= _toggleThreshold ||
-                  _showUncompletedTasks)
-                SliverList(
-                  delegate: SliverChildBuilderDelegate((context, index) {
-                    return _buildTaskItem(
-                      uncompletedTasks,
-                      index,
-                      false,
-                      scale,
-                    );
-                  }, childCount: uncompletedTasks.length),
-                ),
-              if (uncompletedTasks.length > _toggleThreshold &&
-                  !_showUncompletedTasks)
-                SliverToBoxAdapter(child: SizedBox(height: 12 * scale)),
-              if (completedTasks.isNotEmpty)
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: EdgeInsets.only(
-                      left: 25.0 * scale,
-                      right: 25 * scale,
-                      top: 40 * scale,
-                      bottom: 10 * scale,
-                    ),
-                    child: Text(
-                      'Completed',
-                      style: TextStyle(
-                        fontSize: 20 * scale,
-                        fontWeight: FontWeight.bold,
-                        color: contrastColor,
                       ),
                     ),
-                  ),
-                ),
-              if (completedTasks.length > _toggleThreshold)
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: 25.0 * scale,
-                      vertical: 8.0 * scale,
+                  if (uncompletedTasks.length <= _toggleThreshold ||
+                      _showUncompletedTasks)
+                    SliverList(
+                      delegate: SliverChildBuilderDelegate((context, index) {
+                        return _buildTaskItem(
+                          uncompletedTasks,
+                          index,
+                          false,
+                          scale,
+                        );
+                      }, childCount: uncompletedTasks.length),
                     ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          '${completedTasks.length} completed tasks',
+                  if (uncompletedTasks.length > _toggleThreshold &&
+                      !_showUncompletedTasks)
+                    SliverToBoxAdapter(child: SizedBox(height: 12 * scale)),
+                  if (completedTasks.isNotEmpty)
+                    SliverToBoxAdapter(
+                      child: Padding(
+                        padding: EdgeInsets.only(
+                          left: 25.0 * scale,
+                          right: 25 * scale,
+                          top: 40 * scale,
+                          bottom: 10 * scale,
+                        ),
+                        child: Text(
+                          'Completed',
                           style: TextStyle(
-                            fontSize: 16 * scale,
-                            color: contrastColor.withAlpha(200),
+                            fontSize: 20 * scale,
+                            fontWeight: FontWeight.bold,
+                            color: contrastColor,
                           ),
                         ),
-                        TextButton.icon(
-                          onPressed: () {
-                            setState(() {
-                              _showCompletedTasks = !_showCompletedTasks;
-                            });
-                          },
-                          icon: Icon(
-                            _showCompletedTasks
-                                ? Icons.expand_less
-                                : Icons.expand_more,
-                            color: primaryColor,
-                          ),
-                          label: Text(
-                            _showCompletedTasks ? 'Hide list' : 'Show list',
-                            style: TextStyle(color: primaryColor),
-                          ),
-                        ),
-                      ],
+                      ),
                     ),
-                  ),
-                ),
-              if (completedTasks.length <= _toggleThreshold ||
-                  _showCompletedTasks)
-                SliverList(
-                  delegate: SliverChildBuilderDelegate((context, index) {
-                    return _buildTaskItem(completedTasks, index, true, scale);
-                  }, childCount: completedTasks.length),
-                ),
-              if (completedTasks.length > _toggleThreshold &&
-                  !_showCompletedTasks)
-                SliverToBoxAdapter(child: SizedBox(height: 12 * scale)),
-              SliverToBoxAdapter(child: SizedBox(height: 100 * scale)),
-            ],
+                  if (completedTasks.length > _toggleThreshold)
+                    SliverToBoxAdapter(
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 25.0 * scale,
+                          vertical: 8.0 * scale,
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              '${completedTasks.length} completed tasks',
+                              style: TextStyle(
+                                fontSize: 16 * scale,
+                                color: contrastColor.withAlpha(200),
+                              ),
+                            ),
+                            TextButton.icon(
+                              onPressed: () {
+                                setState(() {
+                                  _showCompletedTasks = !_showCompletedTasks;
+                                });
+                              },
+                              icon: Icon(
+                                _showCompletedTasks
+                                    ? Icons.expand_less
+                                    : Icons.expand_more,
+                                color: primaryColor,
+                              ),
+                              label: Text(
+                                _showCompletedTasks ? 'Hide list' : 'Show list',
+                                style: TextStyle(color: primaryColor),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  if (completedTasks.length <= _toggleThreshold ||
+                      _showCompletedTasks)
+                    SliverList(
+                      delegate: SliverChildBuilderDelegate((context, index) {
+                        return _buildTaskItem(
+                          completedTasks,
+                          index,
+                          true,
+                          scale,
+                        );
+                      }, childCount: completedTasks.length),
+                    ),
+                  if (completedTasks.length > _toggleThreshold &&
+                      !_showCompletedTasks)
+                    SliverToBoxAdapter(child: SizedBox(height: 12 * scale)),
+                  SliverToBoxAdapter(child: SizedBox(height: 100 * scale)),
+                ],
+              ),
+            ),
           ),
-        ),
-      ),
-          Center(
-            child: TagPage(db: db),
-          ),
-          Center(
-            child: MonthlyTrackerPage(db: db),
-          ),
+          Center(child: TagPage(db: db)),
+          Center(child: MonthlyTrackerPage(db: db)),
         ],
       ),
     );
