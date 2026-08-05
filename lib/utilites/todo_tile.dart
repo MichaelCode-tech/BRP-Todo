@@ -4,9 +4,10 @@ class ToDoTile extends StatelessWidget {
   final String taskName;
   final bool taskCompleted;
   final bool isPinned;
+  final String? details;
   final Function(bool?)? onChanged;
-  final VoidCallback onDelete;
-  final VoidCallback onEdit;
+  final VoidCallback? onDelete;
+  final VoidCallback? onEdit;
   final VoidCallback onPin;
 
   const ToDoTile({
@@ -14,16 +15,17 @@ class ToDoTile extends StatelessWidget {
     required this.taskName,
     required this.taskCompleted,
     required this.isPinned,
-    required this.onChanged,
-    required this.onDelete,
-    required this.onEdit,
+    this.details,
+    this.onChanged,
+    this.onDelete,
+    this.onEdit,
     required this.onPin,
   });
 
   @override
   Widget build(BuildContext context) {
-    bool isDark = Theme.of(context).brightness == Brightness.dark;
-    bool isRetro =
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
+    final bool isRetro =
         Theme.of(context).appBarTheme.titleTextStyle?.fontFamily == 'Courier';
     final Color primaryColor = Theme.of(context).primaryColor;
     final Color contrastColor = isDark ? Colors.white : Colors.black;
@@ -41,38 +43,55 @@ class ToDoTile extends StatelessWidget {
           ),
         ),
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 10),
+          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
           child: Row(
             children: [
               Checkbox(value: taskCompleted, onChanged: onChanged),
               const SizedBox(width: 5),
               Expanded(
-                child: Row(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    if (isPinned)
-                      Padding(
-                        padding: const EdgeInsets.only(right: 8.0),
-                        child: Icon(
-                          Icons.push_pin,
-                          size: 16,
-                          color: primaryColor,
+                    Row(
+                      children: [
+                        if (isPinned)
+                          Padding(
+                            padding: const EdgeInsets.only(right: 8.0),
+                            child: Icon(
+                              Icons.push_pin,
+                              size: 16,
+                              color: primaryColor,
+                            ),
+                          ),
+                        Expanded(
+                          child: Text(
+                            taskName,
+                            style: TextStyle(
+                              fontSize: 18,
+                              height: 1.3,
+                              decoration: taskCompleted
+                                  ? TextDecoration.lineThrough
+                                  : TextDecoration.none,
+                              color: taskCompleted
+                                  ? contrastColor.withAlpha(130)
+                                  : contrastColor,
+                            ),
+                          ),
                         ),
-                      ),
-                    Expanded(
-                      child: Text(
-                        taskName,
-                        style: TextStyle(
-                          fontSize: 18,
-                          height: 1.3,
-                          decoration: taskCompleted
-                              ? TextDecoration.lineThrough
-                              : TextDecoration.none,
-                          color: taskCompleted
-                              ? contrastColor.withAlpha(130)
-                              : contrastColor,
-                        ),
-                      ),
+                      ],
                     ),
+                    if (details != null && details!.isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 4.0),
+                        child: Text(
+                          details!,
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: contrastColor.withAlpha(160),
+                            height: 1.3,
+                          ),
+                        ),
+                      ),
                   ],
                 ),
               ),
@@ -91,8 +110,8 @@ class ToDoTile extends StatelessWidget {
                       ),
                 onSelected: (value) {
                   if (value == 'pin') onPin();
-                  if (value == 'edit') onEdit();
-                  if (value == 'delete') onDelete();
+                  if (value == 'edit' && onEdit != null) onEdit!();
+                  if (value == 'delete' && onDelete != null) onDelete!();
                 },
                 itemBuilder: (BuildContext context) => [
                   PopupMenuItem<String>(
@@ -106,7 +125,7 @@ class ToDoTile extends StatelessWidget {
                         ),
                         const SizedBox(width: 10),
                         Text(
-                          isPinned ? "Unpin" : "Pin",
+                          isPinned ? 'Unpin' : 'Pin',
                           style: isRetro
                               ? const TextStyle(fontFamily: 'Courier')
                               : null,
@@ -121,7 +140,7 @@ class ToDoTile extends StatelessWidget {
                         Icon(Icons.edit, size: 18, color: contrastColor),
                         const SizedBox(width: 10),
                         Text(
-                          "Edit",
+                          'Edit',
                           style: isRetro
                               ? const TextStyle(fontFamily: 'Courier')
                               : null,
@@ -136,7 +155,7 @@ class ToDoTile extends StatelessWidget {
                         Icon(Icons.delete, size: 18, color: contrastColor),
                         const SizedBox(width: 10),
                         Text(
-                          "Delete",
+                          'Delete',
                           style: isRetro
                               ? const TextStyle(fontFamily: 'Courier')
                               : null,

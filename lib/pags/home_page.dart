@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:todo1/db/db.dart';
+import 'package:todo1/pags/monthly_tracker_page.dart';
 import 'package:todo1/pags/settings_page.dart';
-import 'package:todo1/utilites/todo_tile.dart';
+import 'package:todo1/pags/tag_page.dart';
 import 'package:todo1/utilites/dialog_box.dart';
+import 'package:todo1/utilites/todo_tile.dart';
 
 class Homepage extends StatefulWidget {
   const Homepage({super.key});
@@ -13,9 +15,6 @@ class Homepage extends StatefulWidget {
 }
 
 class _HomepageState extends State<Homepage> {
-  // Don't access Hive boxes during field initialization — tests may pump
-  // widgets without opening boxes. Access the box lazily in initState
-  // only when it's open.
   Box? _myBox;
   ToDoDB db = ToDoDB();
 
@@ -24,14 +23,11 @@ class _HomepageState extends State<Homepage> {
     super.initState();
     if (Hive.isBoxOpen('MyBox')) {
       _myBox = Hive.box('MyBox');
-      if (_myBox!.get("TODOLIST") == null) {
+      if (_myBox!.get('TODOLIST') == null) {
         db.createInitialData();
       } else {
         db.loadData();
       }
-    } else {
-      // No box available (tests or early startup). Keep DB with defaults;
-      // avoid calling Hive until the box is opened in `main()`.
     }
   }
 
@@ -40,71 +36,113 @@ class _HomepageState extends State<Homepage> {
   bool _showUncompletedTasks = false;
   static const int _toggleThreshold = 5;
 
-  void checkBoxChanged(bool? value, int index, bool isCompletedList) {
-    setState(() {
-      List targetList = isCompletedList ? completedTasks : uncompletedTasks;
-      var task = targetList[index];
-      int originalIndex = db.toDoList.indexOf(task);
-      db.toDoList[originalIndex][1] = !db.toDoList[originalIndex][1];
-    });
-    db.updateDatabase();
+  int _timeToMinutes(String time) {
+    final parts = time.split(':');
+    if (parts.length != 2) return 9999;
+    final hour = int.tryParse(parts[0]) ?? 99;
+    final minute = int.tryParse(parts[1]) ?? 99;
+    return hour * 60 + minute;
   }
 
-  void saveNewTask() {
-    String taskText = _controller.text.trim();
-    if (taskText.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Task cannot be empty!"),
-          backgroundColor: Colors.red,
-        ),
-      );
-      return;
+  int _compareTasksByTime(List a, List b) {
+    final aTime = _timeToMinutes(a[3] as String);
+    final bTime = _timeToMinutes(b[3] as String);
+    if (aTime == bTime) return 0;
+    if (aTime == 9999) return 1;
+    if (bTime == 9999) return -1;
+    return aTime.compareTo(bTime);
+  }
+
+  int _completedAtEpoch(List task) {
+    if (task.length > 6 &&
+        task[6] is String &&
+        (task[6] as String).isNotEmpty) {
+      final parsed = DateTime.tryParse(task[6] as String);
+      return parsed?.millisecondsSinceEpoch ?? 0;
     }
+    return 0;
+  }
+
+  String _formatTimeRange(List task) {
+    final start = task[3] as String;
+    final end = task[4] as String;
+    if (start.isNotEmpty && end.isNotEmpty) {
+      return 'Time: $start – $end';
+    }
+    if (start.isNotEmpty) {
+      return 'Starts at $start';
+    }
+    if (end.isNotEmpty) {
+      return 'Until $end';
+    }
+    return '';
+  }
+
+  String _formatTagLabel(List task) {
+    final tags = task[5] as List;
+    if (tags.isEmpty) return '';
+    return 'Tags: ${tags.join(', ')}';
+  }
+
+  void _toggleTaskCompletion(bool? value, int index, bool isCompletedList) {
+    final targetList = isCompletedList ? completedTasks : uncompletedTasks;
+    final task = targetList[index];
+    final originalIndex = db.toDoList.indexOf(task);
+    if (originalIndex >= 0) {
+      db.toggleTaskCompletion(originalIndex, value ?? false);
+      setState(() {});
+    }
+  }
+
+  void _saveTask(
+    String title,
+    String startTime,
+    String endTime,
+    List<String> tags,
+  ) {
     setState(() {
-      db.toDoList.add([taskText, false, false]);
-      _controller.clear();
+      db.toDoList.add([
+        title,
+        false,
+        false,
+        startTime,
+        endTime,
+        tags,
+        '',
+        DateTime.now().toIso8601String(),
+      ]);
     });
     Navigator.of(context).pop();
     db.updateDatabase();
   }
 
-  void createNewTask() {
-    _controller.clear();
+  void _editTask(int index, bool isCompletedList) {
+    final targetList = isCompletedList ? completedTasks : uncompletedTasks;
+    final task = targetList[index];
+    final originalIndex = db.toDoList.indexOf(task);
+    _controller.text = db.toDoList[originalIndex][0] as String;
     showDialog(
       context: context,
       builder: (context) {
-        return DialogbBox(
-          controller: _controller,
-          onSave: saveNewTask,
-          onCancel: () => Navigator.of(context).pop(),
-        );
-      },
-    );
-  }
-
-  void editTask(int index, bool isCompletedList) {
-    List targetList = isCompletedList ? completedTasks : uncompletedTasks;
-    var task = targetList[index];
-    int originalIndex = db.toDoList.indexOf(task);
-    _controller.text = db.toDoList[originalIndex][0];
-
-    showDialog(
-      context: context,
-      builder: (context) {
-        return DialogbBox(
-          controller: _controller,
-          onSave: () {
-            String updatedText = _controller.text.trim();
+        return TaskDialogBox(
+          initialTitle: db.toDoList[originalIndex][0] as String,
+          initialStartTime: db.toDoList[originalIndex][3] as String,
+          initialEndTime: db.toDoList[originalIndex][4] as String,
+          initialTags: List<String>.from(db.toDoList[originalIndex][5] as List),
+          onSave: (title, startTime, endTime, tags) {
+            final updatedText = title.trim();
             if (updatedText.isNotEmpty) {
               setState(() {
                 db.toDoList[originalIndex][0] = updatedText;
+                db.toDoList[originalIndex][3] = startTime;
+                db.toDoList[originalIndex][4] = endTime;
+                db.toDoList[originalIndex][5] = tags;
               });
               db.updateDatabase();
               Navigator.of(context).pop();
             } else {
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text("Task cannot be empty!")),
+                const SnackBar(content: Text('Task title cannot be empty.')),
               );
             }
           },
@@ -114,38 +152,47 @@ class _HomepageState extends State<Homepage> {
     );
   }
 
-  void deleteTask(int index, bool isCompletedList) {
+  void _deleteTask(int index, bool isCompletedList) {
     setState(() {
-      List targetList = isCompletedList ? completedTasks : uncompletedTasks;
-      var task = targetList[index];
+      final targetList = isCompletedList ? completedTasks : uncompletedTasks;
+      final task = targetList[index];
       db.toDoList.remove(task);
     });
     db.updateDatabase();
   }
 
-  void togglePin(int index, bool isCompletedList) {
+  void _togglePin(int index, bool isCompletedList) {
     setState(() {
-      List targetList = isCompletedList ? completedTasks : uncompletedTasks;
-      var task = targetList[index];
-      int originalIndex = db.toDoList.indexOf(task);
-      db.toDoList[originalIndex][2] = !db.toDoList[originalIndex][2];
+      final targetList = isCompletedList ? completedTasks : uncompletedTasks;
+      final task = targetList[index];
+      final originalIndex = db.toDoList.indexOf(task);
+      if (originalIndex >= 0) {
+        db.toDoList[originalIndex][2] =
+            !(db.toDoList[originalIndex][2] as bool);
+      }
     });
     db.updateDatabase();
   }
 
   List get uncompletedTasks {
-    var tasks = db.toDoList.where((task) => task[1] == false).toList();
-    tasks.sort(
-      (a, b) => (b[2] as bool ? 1 : 0).compareTo(a[2] as bool ? 1 : 0),
-    );
+    final tasks = db.toDoList.where((task) => task[1] == false).toList();
+    tasks.sort((a, b) {
+      if ((b[2] as bool) != (a[2] as bool)) {
+        return (b[2] as bool ? 1 : 0).compareTo(a[2] as bool ? 1 : 0);
+      }
+      return _compareTasksByTime(a, b);
+    });
     return tasks;
   }
 
   List get completedTasks {
-    var tasks = db.toDoList.where((task) => task[1] == true).toList();
-    tasks.sort(
-      (a, b) => (b[2] as bool ? 1 : 0).compareTo(a[2] as bool ? 1 : 0),
-    );
+    final tasks = db.toDoList.where((task) => task[1] == true).toList();
+    tasks.sort((a, b) {
+      if ((b[2] as bool) != (a[2] as bool)) {
+        return (b[2] as bool ? 1 : 0).compareTo(a[2] as bool ? 1 : 0);
+      }
+      return _completedAtEpoch(b).compareTo(_completedAtEpoch(a));
+    });
     return tasks;
   }
 
@@ -155,7 +202,12 @@ class _HomepageState extends State<Homepage> {
     bool isCompletedList,
     double scale,
   ) {
-    final taskName = taskList[index][0] as String;
+    final task = taskList[index];
+    final taskName = task[0] as String;
+    final details = [
+      _formatTimeRange(task),
+      _formatTagLabel(task),
+    ].where((text) => text.isNotEmpty).join(' • ');
     final taskKey =
         '${isCompletedList ? 'completed' : 'todo'}-$index-$taskName';
 
@@ -168,16 +220,45 @@ class _HomepageState extends State<Homepage> {
         padding: EdgeInsets.only(right: 20 * scale),
         child: Icon(Icons.delete, color: Colors.white, size: 20 * scale),
       ),
-      onDismissed: (_) => deleteTask(index, isCompletedList),
+      onDismissed: (_) => _deleteTask(index, isCompletedList),
       child: ToDoTile(
         taskName: taskName,
-        taskCompleted: taskList[index][1],
-        isPinned: taskList[index][2],
-        onChanged: (value) => checkBoxChanged(value, index, isCompletedList),
-        onDelete: () => deleteTask(index, isCompletedList),
-        onEdit: () => editTask(index, isCompletedList),
-        onPin: () => togglePin(index, isCompletedList),
+        details: details,
+        taskCompleted: task[1] as bool,
+        isPinned: task[2] as bool,
+        onChanged: (value) =>
+            _toggleTaskCompletion(value, index, isCompletedList),
+        onDelete: () => _deleteTask(index, isCompletedList),
+        onEdit: () => _editTask(index, isCompletedList),
+        onPin: () => _togglePin(index, isCompletedList),
       ),
+    );
+  }
+
+  void _showNewTaskDialog() {
+    _controller.clear();
+    showDialog(
+      context: context,
+      builder: (context) {
+        return TaskDialogBox(
+          onSave: _saveTask,
+          onCancel: () => Navigator.of(context).pop(),
+        );
+      },
+    );
+  }
+
+  void _navigateToTags() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => TagPage(db: db)),
+    ).then((_) => setState(() {}));
+  }
+
+  void _navigateToTracker() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => MonthlyTrackerPage(db: db)),
     );
   }
 
@@ -200,9 +281,20 @@ class _HomepageState extends State<Homepage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Todo', style: TextStyle(color: primaryColor)),
+        title: Text('Todo Tracker', style: TextStyle(color: primaryColor)),
         actions: [
           IconButton(
+            tooltip: 'Monthly Tracker',
+            onPressed: _navigateToTracker,
+            icon: const Icon(Icons.insights),
+          ),
+          IconButton(
+            tooltip: 'Tags',
+            onPressed: _navigateToTags,
+            icon: const Icon(Icons.label_outline),
+          ),
+          IconButton(
+            tooltip: 'Settings',
             onPressed: () => Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => const SettingsPage()),
@@ -212,7 +304,7 @@ class _HomepageState extends State<Homepage> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: createNewTask,
+        onPressed: _showNewTaskDialog,
         child: const Icon(Icons.add),
       ),
       body: Center(
@@ -235,7 +327,6 @@ class _HomepageState extends State<Homepage> {
                               width: 48 * scale,
                               height: 48 * scale,
                               fit: BoxFit.cover,
-                              // Tint dark logos in dark mode so they remain visible
                               color: isDark ? Colors.white : null,
                               colorBlendMode: isDark ? BlendMode.srcIn : null,
                               errorBuilder: (context, error, stackTrace) =>
@@ -259,14 +350,14 @@ class _HomepageState extends State<Homepage> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                "Welcome to MicCode App",
+                                'Plan your day and track progress by tag.',
                                 style: TextStyle(
                                   fontSize: 14 * scale,
                                   color: contrastColor.withAlpha(180),
                                 ),
                               ),
                               Text(
-                                "Todo",
+                                'Todo Tracker',
                                 style: TextStyle(
                                   fontSize: 28 * scale,
                                   fontWeight: FontWeight.bold,
@@ -306,7 +397,7 @@ class _HomepageState extends State<Homepage> {
                         ),
                         SizedBox(height: 12 * scale),
                         Text(
-                          'Tap + to add your first todo item and keep your day on track.',
+                          'Tap + to add your first task, set time windows, assign tags, and start tracking monthly progress.',
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             fontSize: 16 * scale,
@@ -326,7 +417,7 @@ class _HomepageState extends State<Homepage> {
                       vertical: 14 * scale,
                     ),
                     child: Text(
-                      "Todo",
+                      'In Progress',
                       style: TextStyle(
                         fontSize: 20 * scale,
                         fontWeight: FontWeight.bold,
@@ -346,7 +437,7 @@ class _HomepageState extends State<Homepage> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          '${uncompletedTasks.length} tasks in progress',
+                          '${uncompletedTasks.length} active tasks',
                           style: TextStyle(
                             fontSize: 16 * scale,
                             color: contrastColor.withAlpha(200),
@@ -398,7 +489,7 @@ class _HomepageState extends State<Homepage> {
                       bottom: 10 * scale,
                     ),
                     child: Text(
-                      "Completed",
+                      'Completed',
                       style: TextStyle(
                         fontSize: 20 * scale,
                         fontWeight: FontWeight.bold,
