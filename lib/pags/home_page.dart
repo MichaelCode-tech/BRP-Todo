@@ -273,77 +273,62 @@ class _HomepageState extends State<Homepage> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Todo Tracker', style: TextStyle(color: primaryColor)),
+        elevation: 0,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        foregroundColor: primaryColor,
+        actions: [
+          IconButton(
+            tooltip: 'Settings',
+            icon: Icon(Icons.settings, color: contrastColor.withAlpha(160)),
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const SettingsPage()),
+            ),
+          ),
+        ],
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _showNewTaskDialog,
         child: const Icon(Icons.add),
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      bottomNavigationBar: BottomAppBar(
-        shape: const CircularNotchedRectangle(),
-        notchMargin: 8.0,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              IconButton(
-                tooltip: 'Tasks',
-                icon: Icon(
-                  Icons.checklist_rtl,
-                  color: _bottomNavIndex == 0
-                      ? primaryColor
-                      : contrastColor.withAlpha(160),
-                ),
-                onPressed: () {
-                  setState(() {
-                    _bottomNavIndex = 0;
-                  });
-                },
-              ),
-              Row(
-                children: [
-                  IconButton(
-                    tooltip: 'Tags',
-                    icon: Icon(
-                      Icons.label_outline,
-                      color: _bottomNavIndex == 1
-                          ? primaryColor
-                          : contrastColor.withAlpha(160),
-                    ),
-                    onPressed: () {
-                      setState(() {
-                        _bottomNavIndex = 1;
-                      });
-                    },
-                  ),
-                  IconButton(
-                    tooltip: 'Tracker',
-                    icon: Icon(
-                      Icons.insights,
-                      color: _bottomNavIndex == 2
-                          ? primaryColor
-                          : contrastColor.withAlpha(160),
-                    ),
-                    onPressed: () {
-                      setState(() {
-                        _bottomNavIndex = 2;
-                      });
-                    },
-                  ),
-                ],
-              ),
-              IconButton(
-                tooltip: 'Settings',
-                icon: Icon(Icons.settings, color: contrastColor.withAlpha(160)),
-                onPressed: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const SettingsPage()),
-                ),
-              ),
-            ],
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _bottomNavIndex,
+        onTap: (index) {
+          setState(() {
+            _bottomNavIndex = index;
+          });
+        },
+        type: BottomNavigationBarType.fixed,
+        selectedItemColor: primaryColor,
+        unselectedItemColor: contrastColor.withAlpha(140),
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        elevation: 10,
+        selectedLabelStyle: const TextStyle(fontWeight: FontWeight.w600),
+        unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w400),
+        items: const [
+          BottomNavigationBarItem(
+            icon: Padding(
+              padding: EdgeInsets.only(bottom: 4.0),
+              child: Icon(Icons.checklist_rtl),
+            ),
+            label: 'Tasks',
           ),
-        ),
+          BottomNavigationBarItem(
+            icon: Padding(
+              padding: EdgeInsets.only(bottom: 4.0),
+              child: Icon(Icons.label_outline),
+            ),
+            label: 'Tags',
+          ),
+          BottomNavigationBarItem(
+            icon: Padding(
+              padding: EdgeInsets.only(bottom: 4.0),
+              child: Icon(Icons.insights),
+            ),
+            label: 'Tracker',
+          ),
+        ],
       ),
       body: IndexedStack(
         index: _bottomNavIndex,
