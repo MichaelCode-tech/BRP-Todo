@@ -66,7 +66,7 @@ Want to run the project locally or contribute? Follow these steps:
 
 ```bash
 # 1. Clone the repository
-git clone [https://github.com/MichaelCode-tech/Todo-app.git](https://github.com/MichaelCode-tech/Todo-app.git)
+git clone https://github.com/MichaelCode-tech/BRP-Todo/
 
 # 2. Change into project directory
 cd Todo-app
