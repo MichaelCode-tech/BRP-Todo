@@ -34,6 +34,7 @@ class _HomepageState extends State<Homepage> {
   final _controller = TextEditingController();
   bool _showCompletedTasks = false;
   bool _showUncompletedTasks = false;
+  int _bottomNavIndex = 0;
   static const int _toggleThreshold = 5;
 
   int _timeToMinutes(String time) {
@@ -282,40 +283,84 @@ class _HomepageState extends State<Homepage> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Todo Tracker', style: TextStyle(color: primaryColor)),
-        actions: [
-          IconButton(
-            tooltip: 'Monthly Tracker',
-            onPressed: _navigateToTracker,
-            icon: const Icon(Icons.insights),
-          ),
-          IconButton(
-            tooltip: 'Tags',
-            onPressed: _navigateToTags,
-            icon: const Icon(Icons.label_outline),
-          ),
-          IconButton(
-            tooltip: 'Settings',
-            onPressed: () => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const SettingsPage()),
-            ),
-            icon: const Icon(Icons.settings),
-          ),
-        ],
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _showNewTaskDialog,
         child: const Icon(Icons.add),
       ),
-      body: Center(
-        child: ConstrainedBox(
-          constraints: BoxConstraints(maxWidth: maxContentWidth),
-          child: CustomScrollView(
-            slivers: [
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: EdgeInsets.all(25.0 * scale),
-                  child: Column(
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      bottomNavigationBar: BottomAppBar(
+        shape: const CircularNotchedRectangle(),
+        notchMargin: 8.0,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              IconButton(
+                tooltip: 'Tasks',
+                icon: Icon(
+                  Icons.checklist_rtl,
+                  color: _bottomNavIndex == 0 ? primaryColor : contrastColor.withAlpha(160),
+                ),
+                onPressed: () {
+                  setState(() {
+                    _bottomNavIndex = 0;
+                  });
+                },
+              ),
+              Row(
+                children: [
+                  IconButton(
+                    tooltip: 'Tags',
+                    icon: Icon(
+                      Icons.label_outline,
+                      color: _bottomNavIndex == 1 ? primaryColor : contrastColor.withAlpha(160),
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        _bottomNavIndex = 1;
+                      });
+                    },
+                  ),
+                  IconButton(
+                    tooltip: 'Tracker',
+                    icon: Icon(
+                      Icons.insights,
+                      color: _bottomNavIndex == 2 ? primaryColor : contrastColor.withAlpha(160),
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        _bottomNavIndex = 2;
+                      });
+                    },
+                  ),
+                ],
+              ),
+              IconButton(
+                tooltip: 'Settings',
+                icon: Icon(Icons.settings, color: contrastColor.withAlpha(160)),
+                onPressed: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const SettingsPage()),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+      body: IndexedStack(
+        index: _bottomNavIndex,
+        children: [
+          Center(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(maxWidth: maxContentWidth),
+              child: CustomScrollView(
+                slivers: [
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: EdgeInsets.all(25.0 * scale),
+                      child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Row(
@@ -550,6 +595,14 @@ class _HomepageState extends State<Homepage> {
             ],
           ),
         ),
+      ),
+          Center(
+            child: TagPage(db: db),
+          ),
+          Center(
+            child: MonthlyTrackerPage(db: db),
+          ),
+        ],
       ),
     );
   }
